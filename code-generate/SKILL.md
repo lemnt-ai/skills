@@ -58,21 +58,22 @@ description: >-
 
 ### Step 4 — 逐层生成代码
 
-按以下顺序逐层生成：
+按以下顺序逐层生成，每层**必须包含**清单中列出的内容：
 
-| 层 | 文件 | 参考规范 |
-|:--:|------|----------|
-| BO | `api/.../bo/XxxBo.java` | codegen → BaseBO |
-| VO | `api/.../vo/XxxVo.java` | codegen → BaseVO |
-| DO | `domain/Xxx.java` | codegen → BaseDO |
-| Mapper | `mapper/XxxMapper.java` | codegen → BaseMapper |
-| Converter | `converter/XxxConverter.java` | codegen → MapStruct |
-| Service | `service/XxxService.java` | code-style → 命名 |
-| ServiceImpl | `service/impl/XxxServiceImpl.java` | code-style → @Service |
-| Controller | `controller/XxxController.java` | api-conventions → REST |
+| 层 | 文件 | 必须包含 | 参考规范 |
+|:--:|------|----------|----------|
+| BO | `api/.../bo/XxxBo.java` | 继承 BaseBO → 查询条件字段 + @Schema + getParams()（时间范围） | codegen → BaseBO |
+| VO | `api/.../vo/XxxVo.java` | 继承 BaseVO → 响应字段 + @Schema + @Excel(导出) + @JsonFormat(日期) | codegen → BaseVO |
+| DO | `domain/Xxx.java` | 继承 BaseDO → @Data + @Accessors(chain) + @EqualsAndHashCode + @TableName + @TableLogic + 字段注释 | codegen → BaseDO |
+| Mapper | `mapper/XxxMapper.java` | 继承 BaseMapper\<DO\> + @Mapper；复杂 SQL 配 XML | codegen → BaseMapper |
+| Converter | `converter/XxxConverter.java` | @Mapper(componentModel="spring", unmappedTargetPolicy=IGNORE) + toVo/toVoList/to(vo)/to(bo) | codegen → MapStruct |
+| Service | `service/XxxService.java` | 接口：page(BO,PageQuery)→TableDataInfo / selectList(BO)→List\<VO\> / selectById(id)→VO / save(BO)→Boolean / updateById(BO)→Boolean / batchRemove(ids[])→Boolean | code-style → 命名 |
+| ServiceImpl | `service/impl/XxxServiceImpl.java` | implements 接口 + @Service + buildQueryWrapper(BO)→LambdaQueryWrapper + 批量删除 @Transactional + log.info/error | code-style → @Service |
+| Controller | `controller/XxxController.java` | 继承 BaseController + @Tag + @RestController + @RequiredArgsConstructor + 标准端点（page/list/{id}/POST/PUT/DELETE/export）+ @RequiresPermissions + @Log + @Operation | api-conventions → REST |
 
 - ⚠️ 如果发现设计文档与项目架构冲突：暂停生成，列出冲突点请用户决策
 - 每个文件生成时，打开一个项目已有同类文件作为参考
+- 每完成 2-3 层（建议 BO+VO+DO → Mapper+Converter → Service+Impl → Controller），输出阶段性成果请用户确认
 
 ### Step 5 — 逐层自检
 
