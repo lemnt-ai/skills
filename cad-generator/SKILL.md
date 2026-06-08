@@ -131,6 +131,10 @@ TRIGGER when: user says "画图", "cad", "dxf", "CAD图纸", "生成图纸",
 
 - ⚠️ **图形复杂时**（>50个图元）：将绘图逻辑拆分为函数分组（如 `draw_outline()`, `draw_holes()`），每个函数 ≤ 80 行
 - ⚠️ **尺寸需要计算**（如圆周均布孔坐标）：在代码注释中写出计算公式
+- 💡 **常见问题**：
+  - `add_lwpolyline` 坐标列表请用 `[(x,y), ...]` 元组格式，无需重复首点（设置 `close=True`）
+  - `add_circle` 参数为 `(center_x, center_y), radius`，不是 `(x, y, radius)`
+  - 尺寸标注前确保被标注的图元已在 `msp` 中添加，先画图后标注
 
 > **输出格式示例：**
 > ```python
@@ -161,6 +165,38 @@ TRIGGER when: user says "画图", "cad", "dxf", "CAD图纸", "生成图纸",
 - [ ] 文件保存路径是否不含中文字符（部分 CAD 软件兼容性问题）
 
 - ⚠️ **自检发现问题**：标注问题行，给出修正方案
+
+#### 快速验证（可选）
+
+生成代码后可建议用户运行以下快速验证脚本，自动检查 DXF 文件完整性：
+
+```python
+"""quick_validate.py — 验证生成的 DXF 文件"""
+import ezdxf
+
+def validate_dxf(filename):
+    doc = ezdxf.readfile(filename)
+    msp = doc.modelspace()
+    count = len(list(msp))
+    layers = [l.dxf.name for l in doc.layers]
+
+    print(f"✅ 文件: {filename}")
+    print(f"📐 图元数: {count}")
+    print(f"🎨 图层: {layers}")
+    print(f"📏 单位: {doc.units}")
+
+    if count == 0:
+        print("❌ 警告: 模型空间为空，请检查绘图逻辑")
+    else:
+        print("✅ 验证通过: 模型空间包含图元")
+
+if __name__ == "__main__":
+    import sys
+    validate_dxf(sys.argv[1] if len(sys.argv) > 1 else "output.dxf")
+```
+
+- ⚠️ **验证脚本发现问题**（图元数为 0、图层缺失等）：回到 Step 3 修正代码
+
 - 🔴 **检查点**：输出自检结果，确认无问题后进入下一步
 
 ### Step 5 — 输出交付
