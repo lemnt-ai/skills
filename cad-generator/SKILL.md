@@ -1,8 +1,6 @@
 ---
 name: cad-generator
-description: >-
-  双模式 CAD 图纸生成器：ezdxf 模式生成 Python→DXF（通用），AutoCAD 模式生成 AutoLISP→DWG（原生）。
-  支持建筑平面图、机械零件图、电气原理图。
+description: 双模式 CAD 出图：ezdxf 生成 DXF（通用）+ AutoLISP 操作 AutoCAD（原生）。支持建筑/机械/电气图纸。
 TRIGGER when: user says "画图", "cad", "dxf", "CAD图纸", "生成图纸",
   "画个", "绘制", "出图", "工程图", "建筑图", "机械图", "电气图",
   "法兰", "平面图", "零件图", "原理图", "autocad", "lisp", "批量出图",
@@ -157,6 +155,10 @@ TRIGGER when: user says "画图", "cad", "dxf", "CAD图纸", "生成图纸",
   - `add_lwpolyline` 坐标列表用 `[(x,y), ...]` 元组格式，设置 `close=True`
   - `add_circle` 参数为 `(center, radius)`，不是 `(x, y, radius)`
   - 先画图后标注
+- 💡 **ezdxf 版本 API（≥1.4）**：
+  - 尺寸标注用 `msp.add_aligned_dim(p1=..., p2=..., distance=offset)`，**不是** `dimline=` 参数
+  - 文字用 `msp.add_text(...).set_placement(pos, align_point)`，**不是** `set_pos()`
+  - 图形用 `msp.add_disc(center, radius)` 替代 `msp.add_circle` 加填充
 
 #### 模式 B：AutoCAD（AutoLISP → DWG）
 
