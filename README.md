@@ -18,8 +18,30 @@ ai/skills/
 │   └── SKILL.md                    # skill 定义 + 9 步生成流程
 ├── code-review/                    # 代码审查
 │   └── SKILL.md                    # skill 定义 + 7 维审查维度
-└── novel-generator/                # 小说创作生成
-    └── SKILL.md                    # skill 定义 + 创作 + 校验流程
+└── novel-skills/                   # 小说创作 skill 体系（规划/写作/分析/校验/记忆）
+    ├── planning/                   # 规划阶段
+    │   ├── create_world/           #   世界观设定
+    │   ├── create_character/       #   人物设定
+    │   ├── create_faction/         #   势力设定
+    │   └── generate_main_plot/     #   主线剧情
+    ├── writing/                    # 写作阶段
+    │   ├── write_scene/            #   场景写作
+    │   ├── write_dialogue/         #   对话写作
+    │   ├── write_combat/           #   战斗场景
+    │   └── write_emotional_scene/  #   情感场景
+    ├── analysis/                   # 分析阶段
+    │   ├── analyze_character_arc/  #   角色弧光分析
+    │   ├── analyze_relationship/   #   人物关系分析
+    │   ├── detect_plot_holes/      #   剧情漏洞检测
+    │   └── analyze_pacing/         #   叙事节奏分析
+    ├── validation/                 # 验证阶段
+    │   ├── validate_timeline/      #   时间线校验
+    │   ├── validate_character_consistency/ # 角色一致性校验
+    │   └── validate_power_scaling/ #   战力平衡校验
+    └── memory/                     # 记忆阶段
+        ├── summarize_chapter/      #   章节摘要
+        ├── update_character_memory/#   角色记忆更新
+        └── update_timeline_memory/ #   时间线记忆更新
 ```
 
 ---
@@ -116,36 +138,54 @@ BO → VO → DO → Mapper → Converter → Service → ServiceImpl → Contro
 
 ---
 
-### 4. novel-generator — 小说创作生成
+### 4. novel-skills — 小说创作 skill 体系
 
-从灵感或设定出发，完成从世界观构建到逐章写作的完整小说创作流程。每章写完后自动校验**字数、内容质量、剧情一致性**，全程维护人物表、伏笔追踪和全局自洽性。
+`novel-skills/` 是深度专业化的小说创作 skill 集合，按创作流程分为 5 个组、19 个子 skill。每个子 skill 可独立触发，也可按 `planning → writing → memory → analysis/validation` 串联使用。
 
-**触发方式：** 用户在 Claude Code 中输入 `写小说`、`创作小说`、`小说生成`、`续写小说` 等关键词。
+#### planning — 规划阶段
 
-**工作流程：**
+| skill | 功能 | 独立触发词 |
+|-------|------|-----------|
+| `create_world` | 世界观设定（时代/地理/力量体系/核心冲突） | "世界观"、"world building" |
+| `create_character` | 人物设定（性格/动机/语言风格/关系网） | "人物设定"、"character" |
+| `create_faction` | 势力设定（组织/阵营/势力关系） | "势力设定"、"faction" |
+| `generate_main_plot` | 主线剧情 + 分章大纲（章节规划/伏笔） | "剧情"、"大纲"、"plot" |
 
-```
-模式选择 → 大纲规划 → 章纲规划 → 逐章写作 → 全局校验 → 汇总输出
-```
+#### writing — 写作阶段
 
-**核心能力：**
+| skill | 功能 | 独立触发词 |
+|-------|------|-----------|
+| `write_scene` | 场景构建（节奏/感官/转场） | "场景写作"、"scene" |
+| `write_dialogue` | 对话写作（语言风格/潜台词） | "对话"、"dialogue" |
+| `write_combat` | 战斗场景（力量体系/动作节奏） | "战斗"、"combat" |
+| `write_emotional_scene` | 情感场景（克制/留白/情绪曲线） | "情感戏"、"emotional" |
 
-| 阶段 | 功能 | 校验点 |
-|------|------|--------|
-| 大纲规划 | 世界观设定 + 人物表 + 主线总纲 | 设定完整性确认 |
-| 章纲规划 | 分章大纲 + 章节节奏分配 | 章节结构确认 |
-| 逐章写作 | 按大纲生成章节正文 | 字数校验 ±15%、内容质量、剧情推进 |
-| 全局校验 | 全人物一致性、设定自洽、伏笔回收 | 所有校验项用户确认 |
-| 汇总输出 | 合并版/分章版文件输出 | 完成率计算 |
+#### analysis — 分析阶段
 
-**输出格式：**
+| skill | 功能 | 独立触发词 |
+|-------|------|-----------|
+| `analyze_character_arc` | 角色弧光完整性分析 | "弧光"、"character arc" |
+| `analyze_relationship` | 人物关系合理性分析 | "关系分析"、"relationship" |
+| `detect_plot_holes` | 剧情漏洞/逻辑矛盾检测 | "漏洞"、"plot hole" |
+| `analyze_pacing` | 叙事节奏/高潮分布分析 | "节奏"、"pacing" |
 
-| 文件形态 | 适用场景 |
-|----------|----------|
-| 合并版 | 短篇 / 一次性输出 |
-| 分章版 | 长篇 / 分卷创作 |
+#### validation — 验证阶段
 
-> **创作原则：** 设定优先、大纲优先、人物驱动、展示而非告知、一致性至上
+| skill | 功能 | 独立触发词 |
+|-------|------|-----------|
+| `validate_timeline` | 时间线一致性校验 | "时间线"、"timeline" |
+| `validate_character_consistency` | 角色行为/性格一致性校验 | "角色一致性" |
+| `validate_power_scaling` | 战力/力量体系一致性校验 | "战力"、"power scaling" |
+
+#### memory — 记忆阶段
+
+| skill | 功能 | 独立触发词 |
+|-------|------|-----------|
+| `summarize_chapter` | 章节摘要记录 | "摘要"、"summarize" |
+| `update_character_memory` | 角色状态/位置/目标追踪 | "角色记忆"、"角色状态" |
+| `update_timeline_memory` | 故事时间线坐标记录 | "时间线更新" |
+
+> **使用方式：** 每个子 skill 可独立触发调用，也可按创作流程串联使用。
 
 ---
 
@@ -181,7 +221,7 @@ BO → VO → DO → Mapper → Converter → Service → ServiceImpl → Contro
 ## 使用前提
 
 - **Claude Code** 已安装并配置
-- 目标项目为 **Java 17+ / Spring Boot 3**（或其他企业级 Java 项目）
+- 目标项目为 **Java 17+ / Spring Boot 3**（或其他企业级 Java 项目）（研发方向）
 - 项目目录中包含 `CLAUDE.md` 用于 code-generate 识别项目结构
 
 ---
@@ -194,10 +234,13 @@ BO → VO → DO → Mapper → Converter → Service → ServiceImpl → Contro
 # 2. 确认设计文档后触发 code-generate 生成代码
 # 3. （可选）触发 code-review 审查生成的代码
 
-# 创作方向：在 Claude Code 中描述故事灵感
-# 1. 触发 novel-generator 设定世界观和人物
-# 2. 确认大纲后开始逐章写作
-# 3. 每章自动校验字数、内容和剧情一致性
+# 创作方向：按 need 触发对应子 skill
+#   "构建一个魔法世界观"          → 触发 create_world
+#   "设计一个亦正亦邪的反派"      → 触发 create_character
+#   "写一场主角vs反派的战斗"      → 触发 write_combat
+#   "检查已写的3章有没有漏洞"     → 触发 detect_plot_holes
+#   "总结第5章"                  → 触发 summarize_chapter
+#   "写一本玄幻小说，从设定开始"   → 按顺序触发 planning → writing → validation
 ```
 
 ---
