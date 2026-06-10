@@ -1,0 +1,17 @@
+[
+  {
+    "id": 1,
+    "prompt": "评估我写的 code-design skill 质量，看看它有哪些需要改进的地方。",
+    "expected": "按8维度rubric逐项打分，给出总分和建议优化方向"
+  },
+  {
+    "id": 2,
+    "prompt": "帮我优化 code-review skill，它现在缺少安全检查维度的具体输出格式。",
+    "expected": "走完整优化循环（设计测试prompt→基线评估→改进→实测验证→人类确认）"
+  },
+  {
+    "id": 3,
+    "prompt": "我只想看看当前所有skills的总体质量评分，不需要优化。",
+    "expected": "仅执行基线评估，扫描全部SKILL.md并展示评分卡，不进入优化循环"
+  }
+]
