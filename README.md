@@ -18,7 +18,7 @@ ai/skills/
 │   └── SKILL.md                    # skill 定义 + 9 步生成流程
 ├── code-review/                    # 代码审查
 │   └── SKILL.md                    # skill 定义 + 7 维审查维度
-└── novel-skills/                   # 小说创作 skill 体系（规划/写作/分析/校验/记忆）
+└── novel-studio/                   # 小说创作 skill 体系（规划/写作/分析/校验/记忆）
     ├── planning/                   # 规划阶段
     │   ├── create_world/           #   世界观设定
     │   ├── create_character/       #   人物设定
@@ -138,9 +138,9 @@ BO → VO → DO → Mapper → Converter → Service → ServiceImpl → Contro
 
 ---
 
-### 4. novel-skills — 小说创作 skill 体系
+### 4. novel-studio — 小说创作 skill 体系
 
-`novel-skills/` 是深度专业化的小说创作 skill 集合，按创作流程分为 5 个组、19 个子 skill。每个子 skill 可独立触发，也可按 `planning → writing → memory → analysis/validation` 串联使用。
+`novel-studio/` 是深度专业化的小说创作 skill 集合，按创作流程分为 5 个组、19 个子 skill。每个子 skill 可独立触发，也可按 `planning → writing → memory → analysis/validation` 串联使用。
 
 #### planning — 规划阶段
 
