@@ -18,32 +18,41 @@ ai/skills/
 │   └── SKILL.md                    # skill 定义 + 9 步生成流程
 ├── code-review/                    # 代码审查
 │   └── SKILL.md                    # skill 定义 + 7 维审查维度
-└── novel-studio/                   # 小说创作 skill 体系（规划/写作/分析/校验/记忆）
-    ├── planning/                   # 规划阶段
-    │   ├── create_world/           #   世界观设定
-    │   ├── create_character/       #   人物设定
-    │   ├── create_faction/         #   势力设定
-    │   └── generate_main_plot/     #   主线剧情
-    ├── writing/                    # 写作阶段
-    │   ├── write_scene/            #   场景写作
-    │   ├── write_dialogue/         #   对话写作
-    │   ├── write_combat/           #   战斗场景
-    │   └── write_emotional_scene/  #   情感场景
-    ├── analysis/                   # 分析阶段
-    │   ├── analyze_character_arc/  #   角色弧光分析
-    │   ├── analyze_relationship/   #   人物关系分析
-    │   ├── detect_plot_holes/      #   剧情漏洞检测
-    │   └── analyze_pacing/         #   叙事节奏分析
-    ├── validation/                 # 验证阶段
-    │   ├── validate_timeline/      #   时间线校验
-    │   ├── validate_character_consistency/ # 角色一致性校验
-    │   └── validate_power_scaling/ #   战力平衡校验
-    └── memory/                     # 记忆阶段
-        ├── summarize_chapter/      #   章节摘要
-        ├── update_character_memory/#   角色记忆更新
-        └── update_timeline_memory/ #   时间线记忆更新
-```
-
+└── novel-studio/                   # 小说创作插件
+    ├── .claude-plugin/
+    │   └── plugin.json             # 插件身份证（名称/版本/18 个子 skill 注册表）
+    ├── skills/                     # 核心：18 个子 skill
+    │   ├── planning/               # 规划阶段（4 skill）
+    │   │   ├── create_world/
+    │   │   ├── create_character/
+    │   │   ├── create_faction/
+    │   │   └── generate_main_plot/
+    │   ├── writing/                # 写作阶段（4 skill）
+    │   │   ├── write_scene/
+    │   │   ├── write_dialogue/
+    │   │   ├── write_combat/
+    │   │   └── write_emotional_scene/
+    │   ├── analysis/               # 分析阶段（4 skill）
+    │   │   ├── analyze_character_arc/
+    │   │   ├── analyze_relationship/
+    │   │   ├── detect_plot_holes/
+    │   │   └── analyze_pacing/
+    │   ├── validation/             # 校验阶段（3 skill）
+    │   │   ├── validate_timeline/
+    │   │   ├── validate_character_consistency/
+    │   │   └── validate_power_scaling/
+    │   └── memory/                 # 记忆阶段（3 skill）
+    │       ├── summarize_chapter/
+    │       ├── update_character_memory/
+    │       └── update_timeline_memory/
+    ├── agents/                     # 可选：子代理专用提示模板
+    │   ├── world-architect.md
+    │   ├── character-designer.md
+    │   ├── scene-writer.md
+    │   └── plot-hole-detector.md
+    └── hooks/                      # 可选：生命周期钩子
+        ├── hooks.json
+        └── session-start
 ---
 
 ## Skill 介绍
@@ -138,54 +147,104 @@ BO → VO → DO → Mapper → Converter → Service → ServiceImpl → Contro
 
 ---
 
-### 4. novel-studio — 小说创作 skill 体系
+### 4. novel-studio — 小说创作插件
 
-`novel-studio/` 是深度专业化的小说创作 skill 集合，按创作流程分为 5 个组、19 个子 skill。每个子 skill 可独立触发，也可按 `planning → writing → memory → analysis/validation` 串联使用。
+`novel-studio/` 是一个符合插件规范的**小说创作辅助插件**，由 `.claude-plugin/plugin.json`（注册中心）+ 18 个子 skill（skills/）+ 子代理模板（agents/）+ 生命周期钩子（hooks/）组成。
 
-#### planning — 规划阶段
+#### 插件架构
 
-| skill | 功能 | 独立触发词 |
-|-------|------|-----------|
-| `create_world` | 世界观设定（时代/地理/力量体系/核心冲突） | "世界观"、"world building" |
-| `create_character` | 人物设定（性格/动机/语言风格/关系网） | "人物设定"、"character" |
-| `create_faction` | 势力设定（组织/阵营/势力关系） | "势力设定"、"faction" |
-| `generate_main_plot` | 主线剧情 + 分章大纲（章节规划/伏笔） | "剧情"、"大纲"、"plot" |
+```
+novel-studio/
+├── .claude-plugin/
+│   └── plugin.json             # ◀── 插件身份证（名称/版本/18 子 skill 注册表/流水线定义）
+├── skills/                     # 核心：18 个子 skill
+│   ├── planning/               # 规划阶段（4 skill）
+│   ├── writing/                # 写作阶段（4 skill）
+│   ├── analysis/               # 分析阶段（4 skill）
+│   ├── validation/             # 校验阶段（3 skill）
+│   └── memory/                 # 记忆阶段（3 skill）
+├── agents/                     # 子代理专用提示模板
+│   ├── world-architect.md
+│   ├── character-designer.md
+│   ├── scene-writer.md
+│   └── plot-hole-detector.md
+└── hooks/                      # 生命周期钩子
+    ├── hooks.json
+    └── session-start
+```
 
-#### writing — 写作阶段
+#### 核心机制
 
-| skill | 功能 | 独立触发词 |
-|-------|------|-----------|
-| `write_scene` | 场景构建（节奏/感官/转场） | "场景写作"、"scene" |
-| `write_dialogue` | 对话写作（语言风格/潜台词） | "对话"、"dialogue" |
-| `write_combat` | 战斗场景（力量体系/动作节奏） | "战斗"、"combat" |
-| `write_emotional_scene` | 情感场景（克制/留白/情绪曲线） | "情感戏"、"emotional" |
+**`plugin.json`（插件注册中心）**：
+- 声明插件的名称、版本、作者
+- 注册全部 18 个子 skill 的路径、触发词、输入/输出规格
+- 定义内置流水线（全流程创作、仅规划等）
 
-#### analysis — 分析阶段
+**路由逻辑**（skill 触发时自动执行）：
+- **意图分类** — 识别用户需求属于哪一类（规划/写作/分析/校验/记忆/全流程）
+- **路由分发** — 匹配 `plugin.json` 中的 `triggers` 字段，路由到对应子 skill
+- **流水线编排** — 全流程创作自动按 `planning → writing → memory → analysis/validation` 推进
+- **上下文传递** — 上游子 skill 的输出自动作为下游的输入
 
-| skill | 功能 | 独立触发词 |
-|-------|------|-----------|
-| `analyze_character_arc` | 角色弧光完整性分析 | "弧光"、"character arc" |
-| `analyze_relationship` | 人物关系合理性分析 | "关系分析"、"relationship" |
-| `detect_plot_holes` | 剧情漏洞/逻辑矛盾检测 | "漏洞"、"plot hole" |
-| `analyze_pacing` | 叙事节奏/高潮分布分析 | "节奏"、"pacing" |
+**子 skill**：每个独立存在，保留独立触发能力，插件在路由层做编排。
 
-#### validation — 验证阶段
+#### 触发方式
 
-| skill | 功能 | 独立触发词 |
-|-------|------|-----------|
-| `validate_timeline` | 时间线一致性校验 | "时间线"、"timeline" |
-| `validate_character_consistency` | 角色行为/性格一致性校验 | "角色一致性" |
-| `validate_power_scaling` | 战力/力量体系一致性校验 | "战力"、"power scaling" |
+| 场景 | 示例输入 |
+|------|----------|
+| 全流程创作 | "写一本玄幻小说"（自动执行全流水线） |
+| 单 skill 调用 | "设计一个穿越到魔法世界的世界观"（自动路由到 create_world） |
+| 指定阶段 | "帮我规划一下剧情，后续再写"（只执行 planning 阶段） |
+| 分析检查 | "检查已写的前5章有没有剧情漏洞"（自动路由到 detect_plot_holes） |
 
-#### memory — 记忆阶段
+> **每个子 skill 仍可独立触发**（如直接说"写一场战斗"触发 write_combat），但通过插件可获得编排和上下文传递能力。
 
-| skill | 功能 | 独立触发词 |
-|-------|------|-----------|
-| `summarize_chapter` | 章节摘要记录 | "摘要"、"summarize" |
-| `update_character_memory` | 角色状态/位置/目标追踪 | "角色记忆"、"角色状态" |
-| `update_timeline_memory` | 故事时间线坐标记录 | "时间线更新" |
+#### 子 skill 注册表
 
-> **使用方式：** 每个子 skill 可独立触发调用，也可按创作流程串联使用。
+注册在 `plugin.json` 中，共 18 个子 skill，按阶段分组：
+
+**planning — 规划阶段**
+
+| skill | 功能 | 触发词 |
+|-------|------|--------|
+| `create_world` | 世界观设定（时代/地理/力量体系/核心冲突） | 世界观, world building |
+| `create_character` | 人物设定（性格/动机/语言风格/关系网） | 人物设定, character |
+| `create_faction` | 势力设定（组织/阵营/势力关系） | 势力, faction |
+| `generate_main_plot` | 主线剧情 + 分章大纲（章节规划/伏笔） | 剧情, 大纲, plot |
+
+**writing — 写作阶段**
+
+| skill | 功能 | 触发词 |
+|-------|------|--------|
+| `write_scene` | 场景构建（节奏/感官/转场） | 场景写作, scene |
+| `write_dialogue` | 对话写作（语言风格/潜台词） | 对话, dialogue |
+| `write_combat` | 战斗场景（力量体系/动作节奏） | 战斗, combat |
+| `write_emotional_scene` | 情感场景（克制/留白/情绪曲线） | 情感戏, emotional |
+
+**analysis — 分析阶段**
+
+| skill | 功能 | 触发词 |
+|-------|------|--------|
+| `analyze_character_arc` | 角色弧光完整性分析 | 弧光, character arc |
+| `analyze_relationship` | 人物关系合理性分析 | 关系分析, relationship |
+| `detect_plot_holes` | 剧情漏洞/逻辑矛盾检测 | 漏洞, plot hole |
+| `analyze_pacing` | 叙事节奏/高潮分布分析 | 节奏, pacing |
+
+**validation — 校验阶段**
+
+| skill | 功能 | 触发词 |
+|-------|------|--------|
+| `validate_timeline` | 时间线一致性校验 | 时间线, timeline |
+| `validate_character_consistency` | 角色行为/性格一致性校验 | 角色一致性, 人设漂移 |
+| `validate_power_scaling` | 战力/力量体系一致性校验 | 战力, power scaling |
+
+**memory — 记忆阶段**
+
+| skill | 功能 | 触发词 |
+|-------|------|--------|
+| `summarize_chapter` | 章节摘要记录 | 摘要, summarize |
+| `update_character_memory` | 角色状态/位置/目标追踪 | 角色记忆, 角色状态 |
+| `update_timeline_memory` | 故事时间线坐标记录 | 时间线更新 |
 
 ---
 
@@ -234,13 +293,12 @@ BO → VO → DO → Mapper → Converter → Service → ServiceImpl → Contro
 # 2. 确认设计文档后触发 code-generate 生成代码
 # 3. （可选）触发 code-review 审查生成的代码
 
-# 创作方向：按 need 触发对应子 skill
-#   "构建一个魔法世界观"          → 触发 create_world
-#   "设计一个亦正亦邪的反派"      → 触发 create_character
-#   "写一场主角vs反派的战斗"      → 触发 write_combat
-#   "检查已写的3章有没有漏洞"     → 触发 detect_plot_holes
-#   "总结第5章"                  → 触发 summarize_chapter
-#   "写一本玄幻小说，从设定开始"   → 按顺序触发 planning → writing → validation
+# 创作方向：直接说需求，插件自动路由
+#   "写一本玄幻小说"              → 匹配 plugin.json → 全流水线编排
+#   "设计一个穿越到魔法世界的世界观"  → 匹配 create_world 触发词 → 路由到该 skill
+#   "写一场主角vs反派的战斗"      → 匹配 write_combat 触发词 → 路由到该 skill
+#   "检查已写的前5章有没有剧情漏洞" → 匹配 detect_plot_holes 触发词 → 路由到该 skill
+#   "总结第5章"                  → 匹配 summarize_chapter 触发词 → 路由到该 skill
 ```
 
 ---
